@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:note_app/components/note.dart';
-import 'package:note_app/models.dart/note_model.dart';
-import 'package:note_app/network/note_api.dart';
 import 'package:note_app/providers/auth_provider.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
@@ -33,13 +30,6 @@ class _NoteListState extends State<NoteList> {
       await noteProvider.getNotes(auth.uid!);
       debugPrint("${noteProvider.notes}");
       debugPrint("AUTH UID FROM NOTE LIST >>> ${auth.uid}");
-
-      // if (auth.uid != null) {
-      //   noteProvider.getNotes(auth.uid!);
-      // } else {
-      //   debugPrint("AUTH UID IS NULL");
-      // }
-      // callApiandShowNotes(auth.uid);
     });
   }
 
@@ -55,50 +45,70 @@ class _NoteListState extends State<NoteList> {
 
     return noteProvider.notes.isEmpty
         ? const Center(
-            child: Text("You haven't added any notes yet.."),
+            child: Text(
+              "Nothing here.. 🍃",
+              style: TextStyle(color: Colors.grey),
+            ),
           )
         : SizedBox(
+            width: MediaQuery.of(context).size.height * 1,
             height: MediaQuery.of(context).size.height * 0.9,
             child: ListView.builder(
                 itemCount: noteProvider.notes.length,
                 scrollDirection: Axis.vertical,
                 itemBuilder: (context, index) {
                   return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      //   child: NoteComponent(
-                      //     note: notes[index],
-                      //   ),
-                      // );
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 8),
                       child: GestureDetector(
                         onTap: () {
-                          _showDialog(ShowNoteDetailsDialog());
+                          _showDialog(ShowNoteDetailsDialog(
+                            note: noteProvider.notes[index],
+                          ));
                         },
-                        child: Container(
-                          // width: MediaQuery.of(context).size.width * 0.8,
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          // constraints: BoxConstraints(
-                          //   maxWidth: MediaQuery.of(context).size.width * 0.5,
-                          // ),
-                          decoration: BoxDecoration(
-                            color: Colors.brown.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      "${noteProvider.notes[index]['title']}",
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                  // Expanded(child: Text("${notes[index]['title']}")),
-                                  PopupMenuButton(
+                        child: Center(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.87,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 10),
+                            constraints: BoxConstraints(
+                                minHeight:
+                                    MediaQuery.of(context).size.height * 0.05),
+                            decoration: BoxDecoration(
+                              color: Colors.brown.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Stack(
+                              children: [
+                                Column(
+                                  children: [
+                                    noteProvider.notes[index]['title'] == ""
+                                        ? Container()
+                                        : Text(
+                                            "${noteProvider.notes[index]['title']}",
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                    noteProvider.notes[index]['title'] == ""
+                                        ? Container()
+                                        : const Divider(
+                                            color: Colors.brown,
+                                          ),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "${noteProvider.notes[index]['content']}",
+                                        maxLines: 5,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Positioned(
+                                  top: -10,
+                                  right: -15,
+                                  child: PopupMenuButton(
                                     constraints: BoxConstraints(
                                       maxWidth:
                                           MediaQuery.of(context).size.width *
@@ -112,7 +122,12 @@ class _NoteListState extends State<NoteList> {
                                                 vertical: 0, horizontal: 0),
                                             child: TextButton(
                                               onPressed: () {
-                                                _showDialog(EditNoteDialog());
+                                                debugPrint(
+                                                    "FROM NOTE LIST >>> ${noteProvider.notes[index]}");
+                                                _showDialog(EditNoteDialog(
+                                                  note:
+                                                      noteProvider.notes[index],
+                                                ));
                                               },
                                               child: const Row(
                                                 children: [
@@ -151,20 +166,9 @@ class _NoteListState extends State<NoteList> {
                                     iconSize: 18,
                                     // position: PopupMenuPosition.over,
                                   ),
-                                ],
-                              ),
-                              const Divider(
-                                color: Colors.brown,
-                              ),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "${noteProvider.notes[index]['content']}",
-                                  maxLines: 5,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ));

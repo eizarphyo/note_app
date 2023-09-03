@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:note_app/network/user_api.dart';
 import 'package:note_app/providers/auth_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInDialog extends StatefulWidget {
-  SignInDialog({super.key, required this.auth});
+  const SignInDialog({super.key, required this.auth});
 
-  AuthProvider auth;
+  final AuthProvider auth;
 
   @override
   State<SignInDialog> createState() => _SignInDialogState();
@@ -46,7 +44,7 @@ class _SignInDialogState extends State<SignInDialog> {
 
     return Dialog(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         // height: MediaQuery.of(context).size.height * 0.25,
         // constraints: BoxConstraints(
         //   maxHeight: MediaQuery.of(context).size.height * 0.5,
@@ -55,29 +53,48 @@ class _SignInDialogState extends State<SignInDialog> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Login to Your Account",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text(
+                "Login to Your Account",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+              ),
             ),
             TextField(
               controller: _usernameCtrl,
+              autofocus: true,
+              onChanged: (value) {
+                setState(() {});
+              },
               decoration: const InputDecoration(
                 hintText: "Username",
+                hintStyle: TextStyle(fontSize: 15),
               ),
             ),
             TextField(
+              obscureText: true,
               controller: _passwordCtrl,
+              onChanged: (value) {
+                setState(() {});
+              },
               decoration: const InputDecoration(
                 hintText: "Password",
+                hintStyle: TextStyle(fontSize: 15),
               ),
             ),
-            FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // show loading
-                  _signIn();
-                },
-                child: const Text("Login"))
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: FilledButton(
+                  onPressed:
+                      _usernameCtrl.text == "" || _passwordCtrl.text == ""
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                              // show loading
+                              _signIn();
+                            },
+                  child: const Text("Login")),
+            )
           ],
         ),
       ),

@@ -55,7 +55,7 @@ class _SignUpDialogState extends State<SignUpDialog> {
 
     return Dialog(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         // height: MediaQuery.of(context).size.height * 0.25,
         // constraints: BoxConstraints(
         //   maxHeight: MediaQuery.of(context).size.height * 0.5,
@@ -64,36 +64,47 @@ class _SignUpDialogState extends State<SignUpDialog> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Create An Account",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text(
+                "Create An Account",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+              ),
             ),
             TextField(
               controller: _usernameCtrl,
-              onTap: () {
-                // if (namePassProvider.usernameErr) {
-                //   namePassProvider.usernameErr = false;
-                // }
+              autofocus: true,
+              onChanged: (val) {
+                setState(() {});
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: "Username",
-                // errorText: namePassProvider.usernameErr
-                //     ? namePassProvider.nameErrMsg
-                //     : null
+                hintStyle: TextStyle(fontSize: 15),
               ),
             ),
             TextField(
+              obscureText: true,
               controller: _passwordCtrl,
+              onChanged: (val) {
+                setState(() {});
+              },
               decoration: const InputDecoration(
                 hintText: "Password",
+                hintStyle: TextStyle(fontSize: 15),
               ),
             ),
-            FilledButton(
-                onPressed: () {
-                  // show loading
-                  _signUp(auth);
-                },
-                child: const Text("Done"))
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: FilledButton(
+                  onPressed:
+                      _usernameCtrl.text == "" || _passwordCtrl.text == ""
+                          ? null
+                          : () {
+                              // show loading
+                              _signUp(auth);
+                            },
+                  child: const Text("Done")),
+            )
           ],
         ),
       ),

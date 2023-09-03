@@ -47,8 +47,19 @@ class _CreateNoteDialogState extends State<CreateNoteDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  "Create Note",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                ),
+              ),
               TextField(
                 controller: _titleCtrl,
+                autofocus: true,
+                onChanged: (val) {
+                  setState(() {});
+                },
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: "Title",
@@ -62,17 +73,22 @@ class _CreateNoteDialogState extends State<CreateNoteDialog> {
                 controller: _contentCtrl,
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
+                onChanged: (val) {
+                  setState(() {});
+                },
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  hintText: "Description",
+                  hintText: "Description \n\n",
                   hintStyle: TextStyle(color: Colors.grey),
                 ),
               ),
               FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _createNote(noteProvider);
-                  },
+                  onPressed: _titleCtrl.text == "" && _contentCtrl.text == ""
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                          _createNote(noteProvider);
+                        },
                   child: const Text("Save")),
             ],
           ),

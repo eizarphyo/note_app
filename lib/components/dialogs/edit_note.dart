@@ -1,14 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
 
-class EditNoteDialog extends StatefulWidget {
-  EditNoteDialog({
-    super.key,
-    //  required index
-  });
+import '../../network/note_api.dart';
 
-  // late int index;
+class EditNoteDialog extends StatefulWidget {
+  EditNoteDialog({super.key, required this.note});
+
+  Map note = {};
 
   @override
   State<EditNoteDialog> createState() => _EditNoteDialogState();
@@ -18,9 +19,42 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
   final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
 
+  Map? editedNote;
+
+  _editNote(NoteProvider provider) async {
+    final newNote = {
+      "title": _titleCtrl.text,
+      "content": _contentCtrl.text,
+      "uid": widget.note['uid']
+    };
+
+    final jsonNote = json.encode(newNote);
+
+    try {
+      editedNote = await editNoteApi(widget.note['_id'], jsonNote);
+      provider.recallApi();
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _titleCtrl.text = widget.note['title'];
+      _contentCtrl.text = widget.note['content'];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     NoteProvider noteProvider = Provider.of<NoteProvider>(context);
+
+    debugPrint('${widget.note}');
+    // _titleCtrl.text = widget.note['title'];
+    // _contentCtrl.text = widget.note['content'];
 
     return AlertDialog(
       insetPadding: EdgeInsets.zero,
@@ -31,22 +65,29 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
         width: MediaQuery.of(context).size.width * 0.8,
         constraints:
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
-        child: const SingleChildScrollView(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                decoration: InputDecoration(border: InputBorder.none),
+                controller: _titleCtrl,
+                autofocus: true,
+                onChanged: (val) {
+                  setState(() {});
+                },
+                decoration: const InputDecoration(border: InputBorder.none),
               ),
-              Divider(
+              const Divider(
                 color: Colors.brown,
               ),
-              SingleChildScrollView(
-                child: TextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: InputDecoration(border: InputBorder.none),
-                ),
+              TextField(
+                controller: _contentCtrl,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                onChanged: (val) {
+                  setState(() {});
+                },
+                decoration: const InputDecoration(border: InputBorder.none),
               ),
             ],
           ),
@@ -54,9 +95,13 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
       ),
       actions: [
         FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: _titleCtrl.text == "" && _contentCtrl.text == ""
+                ? null
+                : () {
+                    _editNote(noteProvider);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
             child: const Text("Edit")),
       ],
     );

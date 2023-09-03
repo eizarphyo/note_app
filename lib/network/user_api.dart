@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:note_app/utils/constants.dart';
+
 const headers = {'Content-Type': 'application/json'};
 
 Future<Map> signUpApi(body) async {
-  const url = "http://127.0.0.1:3000/noteapp/v1/auth/signup";
+  const url = "$baseUrl/auth/signup";
 
   final uri = Uri.parse(url);
 
@@ -29,7 +31,7 @@ Future<Map> signUpApi(body) async {
 }
 
 Future<Map> signInApi(body) async {
-  const String signInUrl = "http://127.0.0.1:3000/noteapp/v1/auth/signin";
+  const String signInUrl = "$baseUrl/auth/signin";
 
   final Uri uri = Uri.parse(signInUrl);
 
