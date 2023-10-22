@@ -27,17 +27,12 @@ class _NoteListState extends State<NoteList> {
       final NoteProvider noteProvider =
           Provider.of<NoteProvider>(context, listen: false);
 
-      await noteProvider.getNotes(auth.uid!);
+      // await noteProvider.getNotes(auth.uid!);
+      await noteProvider.getNotes(auth.token!);
       debugPrint("${noteProvider.notes}");
-      debugPrint("AUTH UID FROM NOTE LIST >>> ${auth.uid}");
+      debugPrint("AUTH TOKEN FROM NOTE LIST >>> ${auth.token}");
     });
   }
-
-  // callApiandShowNotes(uid) async {
-  //   notes = await getAllNotes(uid);
-  //   setState(() {});
-  //   debugPrint('$notes');
-  // }
 
   @override
   Widget build(BuildContext context) {

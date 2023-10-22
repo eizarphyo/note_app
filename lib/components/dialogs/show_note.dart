@@ -17,7 +17,7 @@ class _ShowNoteDetailsDialogState extends State<ShowNoteDetailsDialog> {
       child: Stack(
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 15),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 15),
             constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.65),
             child: SingleChildScrollView(

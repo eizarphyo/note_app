@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:note_app/components/dialogs/create_note.dart';
 import 'package:note_app/components/dialogs/not_signin.dart';
+import 'package:note_app/components/loader.dart';
 import 'package:note_app/components/note_list.dart';
 import 'package:note_app/providers/auth_provider.dart';
+import 'package:note_app/providers/loading_provider.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui' as ui;
 
 void main() {
   runApp(const MyApp());
@@ -13,28 +16,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // AuthProvider authProvider =
-    //     Provider.of<AuthProvider>(context, listen: false);
-    // NoteProvider noteProvider =
-    //     Provider.of<NoteProvider>(context, listen: false);
-
-    // checkAuth() {
-    //   authProvider.initUidWithPrefsUid();
-    //   if (authProvider.uid != null) {
-    //     debugPrint("from the very start >>>>>>>>> ${authProvider.uid}");
-    //     noteProvider.getNotes(authProvider.uid!);
-    //   }
-    // }
-
-    // checkAuth();
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => NoteProvider()),
+        ChangeNotifierProvider(create: (context) => LoadingProvider()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -89,15 +77,15 @@ class _HomePageState extends State<HomePage> {
   //   }
   // }
 
-  _onButtonPressed(AuthProvider authProvd) {
-    authProvider.initAndGetUidWithPrefsUid();
+  _onButtonPressed(AuthProvider authProvd) async {
+    final String? token = await authProvider.getTokenFromPrefs();
 
-    if (authProvd.uid == null) {
+    if (token == null) {
       _showDialog(NotSigninAlert(
         auth: authProvd,
       ));
     } else {
-      _showDialog(CreateNoteDialog());
+      _showDialog(const CreateNoteDialog());
     }
   }
 
@@ -110,10 +98,11 @@ class _HomePageState extends State<HomePage> {
       NoteProvider noteProvider =
           Provider.of<NoteProvider>(context, listen: false);
 
-      String? uid = await authProvider.initAndGetUidWithPrefsUid();
+      String? token = await authProvider.getTokenFromPrefs();
 
-      if (uid != null) {
-        noteProvider.getNotes(uid);
+      debugPrint("---- $token");
+      if (token != null) {
+        noteProvider.getNotes(token);
         setState(() {});
       }
     });
@@ -122,6 +111,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     authProvider = Provider.of<AuthProvider>(context);
+    final loadingProvider = Provider.of<LoadingProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -140,13 +130,14 @@ class _HomePageState extends State<HomePage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  authProvider.uid == null
-                      ? const Text("No notes... 🍃")
+                  authProvider.token == null
+                      ? const Text("You aren't signed in")
                       : const NoteList(),
                 ],
               ),
             ),
           ),
+          // ADD BUTTON
           Positioned(
             right: 35,
             bottom: 50,
@@ -164,6 +155,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          // Loader
+          loadingProvider.loading ? const Loader() : Container()
         ],
       ),
     );

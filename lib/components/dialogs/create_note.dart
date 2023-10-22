@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:note_app/providers/loading_provider.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,27 +17,31 @@ class _CreateNoteDialogState extends State<CreateNoteDialog> {
   final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
 
-  _createNote(NoteProvider provider) async {
+  _createNote(NoteProvider provider, LoadingProvider loader) async {
+    loader.loading = true;
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final Map note = {
-      "title": _titleCtrl.text,
-      "content": _contentCtrl.text,
-      "uid": prefs.getString('uid')
-    };
+    final Map note = {"title": _titleCtrl.text, "content": _contentCtrl.text};
+
+    final token = prefs.getString('token');
 
     try {
-      final responseNote = await createNoteApi(note);
+      final responseNote = await createNoteApi(note, token!);
       debugPrint('$responseNote');
       provider.recallApi();
     } catch (err) {
       debugPrint('$err');
+    } finally {
+      loader.loading = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final NoteProvider noteProvider = Provider.of<NoteProvider>(context);
+    final LoadingProvider loadingProvider =
+        Provider.of<LoadingProvider>(context);
 
     return Dialog(
       child: Container(
@@ -87,7 +92,7 @@ class _CreateNoteDialogState extends State<CreateNoteDialog> {
                       ? null
                       : () {
                           Navigator.pop(context);
-                          _createNote(noteProvider);
+                          _createNote(noteProvider, loadingProvider);
                         },
                   child: const Text("Save")),
             ],

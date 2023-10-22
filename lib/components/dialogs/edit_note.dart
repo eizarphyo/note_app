@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:note_app/providers/loading_provider.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../network/note_api.dart';
 
@@ -21,20 +23,27 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
 
   Map? editedNote;
 
-  _editNote(NoteProvider provider) async {
+  _editNote(NoteProvider provider, LoadingProvider loader) async {
+    loader.loading = true;
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
     final newNote = {
       "title": _titleCtrl.text,
       "content": _contentCtrl.text,
       "uid": widget.note['uid']
     };
 
-    final jsonNote = json.encode(newNote);
+    final String jsonNote = json.encode(newNote);
 
     try {
-      editedNote = await editNoteApi(widget.note['_id'], jsonNote);
+      editedNote = await editNoteApi(widget.note['_id'], jsonNote, token!);
       provider.recallApi();
     } catch (err) {
       print(err);
+    } finally {
+      loader.loading = false;
     }
   }
 
@@ -51,10 +60,7 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
   @override
   Widget build(BuildContext context) {
     NoteProvider noteProvider = Provider.of<NoteProvider>(context);
-
-    debugPrint('${widget.note}');
-    // _titleCtrl.text = widget.note['title'];
-    // _contentCtrl.text = widget.note['content'];
+    LoadingProvider loadingProvider = Provider.of<LoadingProvider>(context);
 
     return AlertDialog(
       insetPadding: EdgeInsets.zero,
@@ -98,7 +104,7 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
             onPressed: _titleCtrl.text == "" && _contentCtrl.text == ""
                 ? null
                 : () {
-                    _editNote(noteProvider);
+                    _editNote(noteProvider, loadingProvider);
                     Navigator.pop(context);
                     Navigator.pop(context);
                   },

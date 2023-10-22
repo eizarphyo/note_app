@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
   String? _uid;
+  String? _token;
   late SharedPreferences prefs;
 
   bool _usernameErr = false;
@@ -16,11 +17,18 @@ class AuthProvider extends ChangeNotifier {
     return prefs;
   }
 
-  Future<String?> initAndGetUidWithPrefsUid() async {
+  // Future<String?> initAndGetUidWithPrefsUid() async {
+  //   SharedPreferences prefs = await initPrefs();
+  //   _uid = prefs.getString('uid');
+  //   debugPrint("UID FROM PROVIDER >> $uid");
+  //   return _uid;
+  // }
+
+  Future<String?> getTokenFromPrefs() async {
     SharedPreferences prefs = await initPrefs();
-    _uid = prefs.getString('uid');
-    debugPrint("UID FROM PROVIDER >> $uid");
-    return _uid;
+    _token = prefs.getString('token');
+    debugPrint("TOKEN FROM PROVIDER >> $token");
+    return _token;
   }
 
   setPrefsUid(String uid) async {
@@ -28,16 +36,30 @@ class AuthProvider extends ChangeNotifier {
     prefs.setString('uid', uid);
   }
 
+  setTokenInPrefs(String uid) async {
+    SharedPreferences prefs = await initPrefs();
+    prefs.setString('token', uid);
+  }
+
   logout() async {
     SharedPreferences prefs = await initPrefs();
 
     prefs.clear();
-    _uid = null;
+    _token = null;
     notifyListeners();
   }
 
 // GETTERS
   String? get uid => _uid;
+  String? get token => _token;
+
+  set token(String? value) {
+    if (value != null) {
+      _token = value;
+      setTokenInPrefs(value);
+      notifyListeners();
+    }
+  }
 
   bool get usernameErr => _usernameErr;
   bool get passwordErr => _passwordErr;
@@ -53,6 +75,12 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // set token(String value) {
+  //   _token = value;
+  //   setTokenInPrefs(value);
+  //   notifyListeners();
+  // }
 
   set usernameErr(bool value) {
     _usernameErr = value;

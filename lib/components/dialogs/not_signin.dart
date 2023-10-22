@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:note_app/components/dialogs/signin.dart';
 import 'package:note_app/components/dialogs/signup.dart';
 import 'package:note_app/providers/auth_provider.dart';
-import 'package:provider/provider.dart';
 
 class NotSigninAlert extends StatefulWidget {
-  NotSigninAlert({super.key, required this.auth});
+  const NotSigninAlert({super.key, required this.auth});
 
-  AuthProvider auth;
+  final AuthProvider auth;
 
   @override
   State<NotSigninAlert> createState() => _NotSigninAlertState();
@@ -18,7 +17,7 @@ class _NotSigninAlertState extends State<NotSigninAlert> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text("Sign In First"),
-      content: const Text("You need to sign in as a user to take notes."),
+      content: const Text("You need to sign in first to take notes."),
       actions: [
         TextButton(
             onPressed: () {
@@ -33,7 +32,7 @@ class _NotSigninAlertState extends State<NotSigninAlert> {
             onPressed: () {
               Navigator.pop(context);
               // _showSignUpDialog();
-              _showDialog(SignUpDialog());
+              _showDialog(const SignUpDialog());
             },
             child: const Text("Sign Up")),
       ],

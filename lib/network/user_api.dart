@@ -38,9 +38,10 @@ Future<Map> signInApi(body) async {
   final http.Response response =
       await http.post(uri, headers: headers, body: body);
 
-  if (response.statusCode == 200) {
-    final decodedJson = json.decode(response.body);
+  final decodedJson = json.decode(response.body);
 
+  debugPrint('>>>>> $decodedJson');
+  if (response.statusCode == 200) {
     return decodedJson;
   } else if (response.statusCode == 401) {
     // Wrong password

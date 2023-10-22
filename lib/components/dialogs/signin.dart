@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:note_app/network/user_api.dart';
 import 'package:note_app/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/loading_provider.dart';
 
 class SignInDialog extends StatefulWidget {
   const SignInDialog({super.key, required this.auth});
@@ -17,7 +20,9 @@ class _SignInDialogState extends State<SignInDialog> {
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  _signIn() async {
+  _signIn(LoadingProvider loader) async {
+    loader.loading = true;
+
     final Map user = {
       "username": _usernameCtrl.text,
       "password": _passwordCtrl.text
@@ -27,20 +32,22 @@ class _SignInDialogState extends State<SignInDialog> {
 
     try {
       final Map resUser = await signInApi(jsonUser);
-      widget.auth.uid = resUser['user']['_id'];
+      // widget.auth.uid = resUser['user']['_id'];
+      widget.auth.token = resUser['token'];
 
       debugPrint('$resUser');
-      debugPrint('>>>> ${resUser['user']['_id']}');
-      // final SharedPreferences prefs = await SharedPreferences.getInstance();
-      // prefs.setString('uid', resUser['user']['_id']);
+      debugPrint('>>>> ${resUser['token']}');
     } catch (err) {
       debugPrint('$err');
+    } finally {
+      loader.loading = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     // final AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    final LoadingProvider loader = Provider.of<LoadingProvider>(context);
 
     return Dialog(
       child: Container(
@@ -91,7 +98,7 @@ class _SignInDialogState extends State<SignInDialog> {
                           : () {
                               Navigator.pop(context);
                               // show loading
-                              _signIn();
+                              _signIn(loader);
                             },
                   child: const Text("Login")),
             )

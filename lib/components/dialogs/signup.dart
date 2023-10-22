@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:note_app/providers/auth_provider.dart';
+import 'package:note_app/providers/loading_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../../network/user_api.dart';
@@ -15,7 +16,9 @@ class _SignUpDialogState extends State<SignUpDialog> {
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  _signUp(AuthProvider auth) async {
+  _signUp(AuthProvider auth, LoadingProvider loader) async {
+    loader.loading = true;
+
     final objBody = <String, String>{
       "username": _usernameCtrl.text,
       "password": _passwordCtrl.text
@@ -29,14 +32,9 @@ class _SignUpDialogState extends State<SignUpDialog> {
     try {
       final response = await signUpApi(jsonBody);
 
-      auth.uid = response['user']['_id'];
-
-      // final SharedPreferences pres = await SharedPreferences.getInstance();
-      // pres.setString("uid", "${response['user']['_id']}");
-
+      // auth.uid = response['user']['_id'];
+      auth.uid = response['token'];
       Navigator.pop(context);
-
-      // debugPrint("${response['user']['_id']}");
     } catch (err) {
       if (err == 409) {
         // namePassProvider.usernameErr = true;
@@ -46,20 +44,19 @@ class _SignUpDialogState extends State<SignUpDialog> {
       } else {
         debugPrint('$err');
       }
+    } finally {
+      loader.loading = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final AuthProvider auth = Provider.of<AuthProvider>(context);
+    final LoadingProvider loader = Provider.of<LoadingProvider>(context);
 
     return Dialog(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        // height: MediaQuery.of(context).size.height * 0.25,
-        // constraints: BoxConstraints(
-        //   maxHeight: MediaQuery.of(context).size.height * 0.5,
-        // ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
@@ -101,7 +98,7 @@ class _SignUpDialogState extends State<SignUpDialog> {
                           ? null
                           : () {
                               // show loading
-                              _signUp(auth);
+                              _signUp(auth, loader);
                             },
                   child: const Text("Done")),
             )
