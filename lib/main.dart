@@ -7,7 +7,6 @@ import 'package:note_app/providers/auth_provider.dart';
 import 'package:note_app/providers/loading_provider.dart';
 import 'package:note_app/providers/note_provider.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui' as ui;
 
 void main() {
   runApp(const MyApp());
@@ -131,7 +130,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   authProvider.token == null
-                      ? const Text("You aren't signed in")
+                      ? const Text("Tap the button to sign in")
                       : const NoteList(),
                 ],
               ),
